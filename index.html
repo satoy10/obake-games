@@ -95,8 +95,8 @@ a.bigbook:focus-visible{outline:4px solid var(--cream);outline-offset:3px}
       <span><span class="name"><span class="nw">おばけ</span> <span class="nw">カタカナ</span></span><p class="what"><b>バ？ナ ＝ 🍌</b>　はいる カタカナを えらぼう</p><span class="book"></span></span>
     </a>
   </nav>
-  <a class="bigbook" href="daizukan.html"><span class="t">おばけだいずかん</span><span class="c">6つの ゲームで あつめた おばけ <b id="all">0</b>／600</span></a>
-  <p class="note">どの ゲームにも、ちがう おばけが 100ぴき ずつ いるよ</p>
+  <a class="bigbook" href="daizukan.html"><span class="t">おばけだいずかん</span><span class="c">6つの ゲームで あつめた おばけ <b id="all">0</b>／3000</span></a>
+  <p class="note">どの ゲームにも、ちがう おばけが 500ぴき ずつ いるよ</p>
   <button class="parent" id="backup">おうちの かたへ：きろくの あいことば</button>
 </main>
 
@@ -110,7 +110,7 @@ document.querySelectorAll('a.game').forEach(a=>{
   img.src=th.src;
   let n=0; try{ const got=JSON.parse(localStorage.getItem(a.dataset.key+'caught')||'{}'); n=Object.values(got).filter(v=>v>0).length; }catch(e){}
   all+=n;
-  a.querySelector('.book').innerHTML=`<span>おばけずかん</span><span class="bar" aria-hidden="true"><i style="width:${Math.max(n,1.5)}%"></i></span><span><b>${n}</b>／100</span>`;
+  a.querySelector('.book').innerHTML=`<span>おばけずかん</span><span class="bar" aria-hidden="true"><i style="width:${Math.max(n/5,1.5)}%"></i></span><span><b>${n}</b>／500</span>`;
 });
 document.getElementById('all').textContent=all;
 
