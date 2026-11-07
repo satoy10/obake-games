@@ -39,6 +39,7 @@ a.game:focus-visible{outline:4px solid var(--star);outline-offset:3px}
 .game:nth-child(2) .pic canvas{animation-delay:-.9s}.game:nth-child(3) .pic canvas{animation-delay:-1.7s}.game:nth-child(4) .pic canvas{animation-delay:-.4s}
 @keyframes float{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-8px) rotate(3deg)}}
 @media (prefers-reduced-motion:reduce){.pic canvas{animation:none}}
+.nw{display:inline-block;white-space:nowrap}
 .name{font-family:var(--f-pop);font-weight:400;font-size:clamp(26px,6vw,36px);line-height:1.15}
 .what{margin:4px 0 8px;font-size:15px;font-weight:500;color:var(--mist);line-height:1.5}
 .what b{color:var(--cream);font-family:var(--f-pop);font-weight:400}
@@ -71,27 +72,27 @@ a.bigbook:focus-visible{outline:4px solid var(--cream);outline-offset:3px}
   <nav class="games" aria-label="ゲーム">
     <a class="game" href="tashizan.html" data-key="obt-" data-mode="tashi">
       <span class="pic"></span>
-      <span><span class="name">おばけ たしざん</span><p class="what"><b>3 ＋ 4 ＝ ？</b>　こたえを えらんで おばけを つかまえる</p><span class="book"></span></span>
+      <span><span class="name"><span class="nw">おばけ</span> <span class="nw">たしざん</span></span><p class="what"><b>3 ＋ 4 ＝ ？</b>　こたえを えらんで おばけを つかまえる</p><span class="book"></span></span>
     </a>
     <a class="game" href="hikizan.html" data-key="obh-" data-mode="hiki">
       <span class="pic"></span>
-      <span><span class="name">おばけ ひきざん</span><p class="what"><b>7 － 3 ＝ ？</b>　かぼちゃを かぞえて こたえよう</p><span class="book"></span></span>
+      <span><span class="name"><span class="nw">おばけ</span> <span class="nw">ひきざん</span></span><p class="what"><b>7 － 3 ＝ ？</b>　かぼちゃを かぞえて こたえよう</p><span class="book"></span></span>
     </a>
     <a class="game" href="hiragana.html" data-key="obr-" data-mode="kana">
       <span class="pic"></span>
-      <span><span class="name">おばけ ひらがな</span><p class="what"><b>す？か ＝ 🍉</b>　はいる じを えらぼう</p><span class="book"></span></span>
+      <span><span class="name"><span class="nw">おばけ</span> <span class="nw">ひらがな</span></span><p class="what"><b>す？か ＝ 🍉</b>　はいる じを えらぼう</p><span class="book"></span></span>
     </a>
     <a class="game" href="nazonazo.html" data-key="obz-" data-mode="nazo">
       <span class="pic"></span>
-      <span><span class="name">おばけ なぞなぞ</span><p class="what"><b>なーんだ？</b>　なぞなぞの こたえを えらぼう</p><span class="book"></span></span>
+      <span><span class="name"><span class="nw">おばけ</span> <span class="nw">なぞなぞ</span></span><p class="what"><b>なーんだ？</b>　なぞなぞの こたえを えらぼう</p><span class="book"></span></span>
     </a>
     <a class="game" href="tokei.html" data-key="obc-" data-mode="toke">
       <span class="pic"></span>
-      <span><span class="name">おばけ とけい</span><p class="what"><b>いま なんじ？</b>　とけいを よんで こたえよう</p><span class="book"></span></span>
+      <span><span class="name"><span class="nw">おばけ</span> <span class="nw">とけい</span></span><p class="what"><b>いま なんじ？</b>　とけいを よんで こたえよう</p><span class="book"></span></span>
     </a>
     <a class="game" href="katakana.html" data-key="obq-" data-mode="kata">
       <span class="pic"></span>
-      <span><span class="name">おばけ カタカナ</span><p class="what"><b>バ？ナ ＝ 🍌</b>　はいる カタカナを えらぼう</p><span class="book"></span></span>
+      <span><span class="name"><span class="nw">おばけ</span> <span class="nw">カタカナ</span></span><p class="what"><b>バ？ナ ＝ 🍌</b>　はいる カタカナを えらぼう</p><span class="book"></span></span>
     </a>
   </nav>
   <a class="bigbook" href="daizukan.html"><span class="t">おばけだいずかん</span><span class="c">6つの ゲームで あつめた おばけ <b id="all">0</b>／600</span></a>
