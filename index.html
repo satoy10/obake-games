@@ -50,6 +50,11 @@ a.game:focus-visible{outline:4px solid var(--star);outline-offset:3px}
 a.bigbook{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;text-decoration:none;color:#3a1600;background:linear-gradient(#ffe27a,#ffb52a);border-radius:26px;padding:16px 20px;box-shadow:0 6px 0 #a8700b,0 14px 30px rgba(0,0,0,.4)}
 a.bigbook:active{transform:translateY(4px);box-shadow:0 2px 0 #a8700b}
 a.bigbook:focus-visible{outline:4px solid var(--cream);outline-offset:3px}
+h2.more{margin:10px 0 -6px;text-align:center;font-family:var(--f-pop);font-weight:400;font-size:20px;color:var(--mist)}
+a.play{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:16px;text-decoration:none;color:inherit;background:linear-gradient(160deg,#1f4a78,#1c2c5c);border-radius:26px;padding:14px 20px 14px 14px;box-shadow:0 6px 0 #0a1630,0 14px 30px rgba(0,0,0,.4)}
+a.play:active{transform:translateY(4px)}
+a.play:focus-visible{outline:4px solid var(--star);outline-offset:3px}
+a.play .ic{display:grid;place-items:center;width:88px;height:88px;border-radius:20px;background:rgba(255,255,255,.08);font-size:58px;color:var(--star);text-shadow:0 4px 0 #a8700b}
 .bigbook .t{font-family:var(--f-pop);font-weight:400;font-size:clamp(26px,6.5vw,38px)}
 .bigbook .c{font-size:16px;background:rgba(255,255,255,.55);border-radius:99px;padding:5px 14px}
 .bigbook .c b{font-family:var(--f-pop);font-weight:400;font-size:20px}
@@ -97,6 +102,8 @@ a.bigbook:focus-visible{outline:4px solid var(--cream);outline-offset:3px}
   </nav>
   <a class="bigbook" href="daizukan.html"><span class="t">おばけだいずかん</span><span class="c">6つの ゲームで あつめた おばけ <b id="all">0</b>／3000</span></a>
   <p class="note">どの ゲームにも、ちがう おばけが 500ぴき ずつ いるよ</p>
+  <h2 class="more">ほかの あそび</h2>
+  <a class="play" href="shuriken.html"><span class="ic" aria-hidden="true">✦</span><span><span class="name">おばけ しゅりけん</span><p class="what">ゆびで ねらって、ほしの しゅりけんで おばけを スパッ！</p></span></a>
   <button class="parent" id="backup">おうちの かたへ：きろくの あいことば</button>
 </main>
 
