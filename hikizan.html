@@ -78,6 +78,8 @@ button:focus-visible{outline:3px solid var(--star);outline-offset:3px}
 .gzukan button{display:block;width:100%;border:0;border-radius:10px;background:rgba(255,255,255,.06);padding:2px;cursor:pointer}
 .gzukan button.on{background:rgba(255,210,63,.16)}
 .gzukan canvas{width:100%;height:100%;display:block}
+.gzukan button.mono{background:rgba(255,255,255,.1)}
+.gzukan button.mono .gs i{filter:grayscale(1)}
 .gs{position:relative;display:block;width:100%;height:0;padding-bottom:100%}
 .gs i{position:absolute;left:3.5%;top:3.5%;width:93%;height:93%;background-repeat:no-repeat}
 .gs.dark i{filter:brightness(0) opacity(.45)}
@@ -244,6 +246,7 @@ function wrongs(ans){
 let heroColor=0, caught={}, recent=[];
 try{ heroColor=+localStorage.getItem(KEY+'crew')||0; caught=JSON.parse(localStorage.getItem(KEY+'caught')||'{}'); }catch(e){}
 function save(){ try{ localStorage.setItem(KEY+'crew',heroColor); localStorage.setItem(KEY+'caught',JSON.stringify(caught)); }catch(e){} }
+let mono={}; try{ mono=(JSON.parse(localStorage.getItem('obs-caught')||'{}')||{})[MODE]||{}; }catch(e){}
 const caughtCount=()=>GHOSTS.filter((g,i)=>caught[i]>0).length;
 let usedThisMission=new Set();
 // ghosts not caught yet come more often, so the book fills up; the great king only shows up for the last question
@@ -897,15 +900,17 @@ function drawStamp(){
 }
 function drawBanner(){
   if(!banner) return;
-  const k=ease(banner.t/.4), bw=Math.min(W*.86,480), bh=Math.min(H*.2,180), x=W/2-bw/2, y=L.mode==='tall'?L.padY-bh*.6:H*.42;
+  const k=ease(banner.t/.4), bh=Math.min(H*.2,180), bw=Math.min(W*.94,Math.max(480,bh*3.6)), x=W/2-bw/2, y=L.mode==='tall'?L.padY-bh*.6:H*.42;
   cx.save(); cx.globalAlpha=clamp(banner.t/.2,0,1); cx.translate(W/2,y+bh/2); cx.scale(.7+.3*k,.7+.3*k); cx.translate(-W/2,-(y+bh/2));
   cx.fillStyle='rgba(23,15,46,.9)'; roundRect(x,y,bw,bh,bh*.22); cx.fill(); cx.lineWidth=4; cx.strokeStyle='#ffd23f'; cx.stroke();
   drawGhost(banner.id,x+bh*.55,y+bh/2,bh*.86,'float',0,banner.id);
-  cx.textAlign='left'; cx.textBaseline='middle'; cx.fillStyle='#ff8a2a'; cx.font=`${bh*.17}px "M PLUS Rounded 1c",sans-serif`;
-  if(banner.lost) cx.fillStyle='#ff7fc8';
-  cx.fillText(banner.lost?'ずかんから にげちゃった…':banner.isNew?'あたらしい おばけ！':'また つかまえた！',x+bh*1.08,y+bh*.32);
-  const name=GHOSTS[banner.id].n; let fs=bh*.26; cx.font=`${fs}px "Mochiy Pop One",sans-serif`; const tail=banner.lost?'':' ゲット！'; while(cx.measureText(name+tail).width>bw-bh*1.25&&fs>10){ fs-=1; cx.font=`${fs}px "Mochiy Pop One",sans-serif`; }
-  cx.fillStyle='#fff8ee'; cx.fillText(name+tail,x+bh*1.08,y+bh*.64);
+  cx.textAlign='left'; cx.textBaseline='middle';
+  const tx=x+bh*1.08, tw=bw-bh*1.08-bh*.16, POP='"Mochiy Pop One",sans-serif', RND='"M PLUS Rounded 1c",sans-serif';
+  const put=(str,max,face,yy,col)=>{ cx.font=`${max}px ${face}`; const w=cx.measureText(str).width; if(w>tw) cx.font=`${max*tw/w}px ${face}`; cx.fillStyle=col; cx.fillText(str,tx,y+bh*yy); };
+  const top=banner.lost?'ずかんから にげちゃった…':banner.isNew?'あたらしい おばけ！':'また つかまえた！', name=GHOSTS[banner.id].n, tail=banner.lost?'':' ゲット！';
+  cx.font=`${bh*.26}px ${POP}`; const one=!tail||cx.measureText(name+tail).width<=tw*1.12;
+  if(one){ put(top,bh*.17,RND,.32,banner.lost?'#ff7fc8':'#ff8a2a'); put(name+tail,bh*.26,POP,.64,'#fff8ee'); }
+  else{ put(top,bh*.15,RND,.2,'#ff8a2a'); put(name,bh*.26,POP,.5,'#fff8ee'); put('ゲット！',bh*.2,POP,.8,'#ffd23f'); }
   cx.restore();
 }
 function celeText(str,y,max,fill){
@@ -1024,7 +1029,8 @@ function toTitle(){ cele=null; closeCard(); state='title'; Q=null; setHits(false
 
 // the ghost card: a big picture, the name and what it is like; arrows step through the caught ones
 let cardEl=null, cardReturn=null;
-function openCard(id,from){
+const fitName=(el,name)=>{ el.textContent=name; el.style.whiteSpace='nowrap'; el.style.fontSize=`min(36px, calc((min(420px, 100vw - 32px) - 48px) / ${Math.max(6,[...name].length)}))`; };
+function openCard(id,from,mo=false){
   closeCard(); cardReturn=from||null;
   const got=GHOSTS.map((g,i)=>i).filter(i=>caught[i]>0), pos=got.indexOf(id), gh=GHOSTS[id];
   const m=document.createElement('div'); m.className='modal';
@@ -1032,15 +1038,15 @@ function openCard(id,from){
     <div class="no">No.${String(id+1).padStart(3,'0')}</div><div class="rare" aria-label="レアど ${gh.r}">${stars(gh.r)}${gh.r===3?' レア！':''}</div>
     <h3 id="cardName"></h3><p id="cardFeat"></p><p class="count"></p>
     <div class="row"><button class="btn sub" id="cardRead">よんで！</button><button class="btn" id="cardClose">とじる</button></div>
-    ${got.length>1?'<button class="nav prev" id="cardPrev" aria-label="まえの おばけ">‹</button><button class="nav next" id="cardNext" aria-label="つぎの おばけ">›</button>':''}
+    ${!mo&&got.length>1?'<button class="nav prev" id="cardPrev" aria-label="まえの おばけ">‹</button><button class="nav next" id="cardNext" aria-label="つぎの おばけ">›</button>':''}
   </div>`;
   const big=ghostIcon(id,false,520); big.setAttribute('role','img'); big.setAttribute('aria-label',gh.n);
   m.querySelector('.card').insertBefore(big,m.querySelector('h3'));
-  m.querySelector('#cardName').textContent=gh.n; m.querySelector('#cardFeat').textContent=gh.f;
-  m.querySelector('.count').textContent=`つかまえた かず　${caught[id]}かい`;
+  fitName(m.querySelector('#cardName'),gh.n); m.querySelector('#cardFeat').textContent=mo?'しゅりけんで みつけた おばけ。この ゲームで つかまえると、いろが つくよ！':gh.f;
+  m.querySelector('.count').textContent=mo?'':`つかまえた かず　${caught[id]}かい`; if(mo) big.style.filter='grayscale(1)';
   m.addEventListener('click',e=>{ if(e.target===m) closeCard(); });
   m.querySelector('#cardClose').addEventListener('click',()=>closeCard());
-  m.querySelector('#cardRead').addEventListener('click',()=>sayK(['n:'+id,'f:'+id]));
+  m.querySelector('#cardRead').addEventListener('click',()=>sayK(mo?['n:'+id]:['n:'+id,'f:'+id]));
   const step=d=>{ const nid=got[(pos+d+got.length)%got.length]; sfx.blip(); openCard(nid,cardReturn); sayK(['n:'+nid]); };
   m.querySelector('#cardPrev')?.addEventListener('click',()=>step(-1));
   m.querySelector('#cardNext')?.addEventListener('click',()=>step(1));
@@ -1083,9 +1089,9 @@ function showPanel(kind){
       <div class="gzukan"></div><p class="zukan-legend">つかまえた おばけを タッチすると、おおきく みられるよ。</p>
       <div class="btns"><button class="btn sub" id="back">もどる</button></div>`;
     const z=p.querySelector('.gzukan');
-    GHOSTS.forEach((gh,i)=>{ const got=caught[i]>0, b=document.createElement('button'); b.className=(got?'on':'')+(gh.r===3?' r3':'');
-      b.setAttribute('aria-label',got?gh.n:'まだ みつけていない おばけ'); b.appendChild(ghostSprite(i,!got));
-      b.addEventListener('click',()=>{ if(got){ sfx.blip(); openCard(i,b); sayK(['n:'+i]); } else sfx.boo(); }); z.appendChild(b); });
+    GHOSTS.forEach((gh,i)=>{ const got=caught[i]>0, mo=!got&&mono[i]>0, b=document.createElement('button'); b.className=(got?'on':mo?'mono':'')+(gh.r===3?' r3':'');
+      b.setAttribute('aria-label',got?gh.n:mo?gh.n+'（しゅりけんで みつけた。まだ モノクロ）':'まだ みつけていない おばけ'); b.appendChild(ghostSprite(i,!got&&!mo));
+      b.addEventListener('click',()=>{ if(got||mo){ sfx.blip(); openCard(i,b,mo); sayK(['n:'+i]); } else sfx.boo(); }); z.appendChild(b); });
   }
   overlay.innerHTML=''; overlay.appendChild(p);
   const go=p.querySelector('#go'), zk=p.querySelector('#zk'), back=p.querySelector('#back');

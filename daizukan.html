@@ -46,6 +46,8 @@ section h2 span{font-family:var(--f-round);font-weight:800;font-size:15px;color:
 .grid button.on{background:rgba(255,210,63,.16)}
 .grid button.r3{box-shadow:inset 0 0 0 2px #ffd23f}
 .grid canvas{width:100%;height:100%;display:block}
+.grid button.mono{background:rgba(255,255,255,.1)}
+.grid button.mono .gs i{filter:grayscale(1)}
 .gs{position:relative;display:block;width:100%;height:0;padding-bottom:100%}
 .gs i{position:absolute;left:3.5%;top:3.5%;width:93%;height:93%;background-repeat:no-repeat}
 .gs.dark i{filter:brightness(0) opacity(.45)}
@@ -89,6 +91,9 @@ const stars=n=>'★'.repeat(n)+'☆'.repeat(3-n);
 const caught={};
 SETS.forEach(s=>{ try{ caught[s.id]=JSON.parse(localStorage.getItem(s.key+'caught')||'{}'); }catch(e){ caught[s.id]={}; } });
 const has=(s,i)=>caught[s][i]>0;
+// ghosts met in おばけ しゅりけん: grey until caught in their own game
+let monoAll={}; try{ monoAll=JSON.parse(localStorage.getItem('obs-caught')||'{}')||{}; }catch(e){}
+const isMono=(s,i)=>!has(s,i)&&(monoAll[s]||{})[i]>0;
 
 // ---------- pictures ----------
 const IMG={};
@@ -149,10 +154,10 @@ function render(){
     sec.innerHTML=`<h2>${s.name}の おばけ <span>${n}／${s.ghosts.length}</span></h2><div class="grid"></div>`;
     const grid=sec.querySelector('.grid');
     s.ghosts.forEach((g,i)=>{
-      const got=has(s.id,i), b=document.createElement('button');
-      b.className=(got?'on':'')+(g.r===3?' r3':''); b.setAttribute('aria-label',got?g.n:'まだ みつけていない おばけ');
-      b.appendChild(ghostSprite(s.id,i,!got));
-      b.addEventListener('click',()=>{ if(got){ openCard(s.id,i,b); say([`${s.id}:n:${i}`]); } });
+      const got=has(s.id,i), mo=isMono(s.id,i), b=document.createElement('button');
+      b.className=(got?'on':mo?'mono':'')+(g.r===3?' r3':''); b.setAttribute('aria-label',got?g.n:mo?g.n+'（しゅりけんで みつけた。まだ モノクロ）':'まだ みつけていない おばけ');
+      b.appendChild(ghostSprite(s.id,i,!got&&!mo));
+      b.addEventListener('click',()=>{ if(got||mo){ openCard(s.id,i,b,mo); say([`${s.id}:n:${i}`]); } });
       grid.appendChild(b);
     });
     books.appendChild(sec);
@@ -161,7 +166,8 @@ function render(){
 // every caught ghost, in book order, so the arrows can step through all of them
 const allGot=()=>SETS.flatMap(s=>s.ghosts.map((g,i)=>[s.id,i]).filter(([,i])=>has(s.id,i)));
 let cardEl=null, cardReturn=null;
-function openCard(set,id,from){
+const fitName=(el,name)=>{ el.textContent=name; el.style.whiteSpace='nowrap'; el.style.fontSize=`min(36px, calc((min(420px, 100vw - 32px) - 48px) / ${Math.max(6,[...name].length)}))`; };
+function openCard(set,id,from,mo=false){
   closeCard(true); cardReturn=from||cardReturn;
   const S=SETS.find(x=>x.id===set), g=S.ghosts[id], list=allGot(), pos=list.findIndex(([s,i])=>s===set&&i===id);
   const m=document.createElement('div'); m.className='modal';
@@ -169,15 +175,15 @@ function openCard(set,id,from){
     <div class="no">${S.name} No.${String(id+1).padStart(3,'0')}</div><div class="rare">${stars(g.r)}${g.r===3?' レア！':''}</div>
     <h3 id="cardName"></h3><p id="cardFeat"></p><p class="count"></p>
     <div class="row"><button class="btn sub" id="cardRead">よんで！</button><button class="btn" id="cardClose">とじる</button></div>
-    ${list.length>1?'<button class="nav prev" id="cardPrev" aria-label="まえの おばけ">‹</button><button class="nav next" id="cardNext" aria-label="つぎの おばけ">›</button>':''}
+    ${!mo&&list.length>1?'<button class="nav prev" id="cardPrev" aria-label="まえの おばけ">‹</button><button class="nav next" id="cardNext" aria-label="つぎの おばけ">›</button>':''}
   </div>`;
   const big=ghostCanvas(set,id,false,520); big.setAttribute('role','img'); big.setAttribute('aria-label',g.n);
   m.querySelector('.card').insertBefore(big,m.querySelector('h3'));
-  m.querySelector('#cardName').textContent=g.n; m.querySelector('#cardFeat').textContent=g.f;
-  m.querySelector('.count').textContent=`つかまえた かず　${caught[set][id]}かい`;
+  fitName(m.querySelector('#cardName'),g.n); m.querySelector('#cardFeat').textContent=mo?`しゅりけんで みつけた おばけ。「${S.name}」の ゲームで つかまえると、いろが つくよ！`:g.f;
+  m.querySelector('.count').textContent=mo?'':`つかまえた かず　${caught[set][id]}かい`; if(mo) big.style.filter='grayscale(1)';
   m.addEventListener('click',e=>{ if(e.target===m) closeCard(); });
   m.querySelector('#cardClose').addEventListener('click',()=>closeCard());
-  m.querySelector('#cardRead').addEventListener('click',()=>say([`${set}:n:${id}`,`${set}:f:${id}`]));
+  m.querySelector('#cardRead').addEventListener('click',()=>say(mo?[`${set}:n:${id}`]:[`${set}:n:${id}`,`${set}:f:${id}`]));
   const step=d=>{ const [s2,i2]=list[(pos+d+list.length)%list.length]; openCard(s2,i2); say([`${s2}:n:${i2}`]); };
   m.querySelector('#cardPrev')?.addEventListener('click',()=>step(-1));
   m.querySelector('#cardNext')?.addEventListener('click',()=>step(1));
