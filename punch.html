@@ -331,12 +331,15 @@ function askSum(){
 function clearStage(){
   state='clear'; sfx.clear(); hud();
   best=Math.max(best,level+1); save();
+  let fresh=false;
+  if(level<=LAST){ try{ const c=JSON.parse(localStorage.getItem('byp-caught')||'{}')||{}; fresh=!c[level]; c[level]=(c[level]||0)+1; localStorage.setItem('byp-caught',JSON.stringify(c)); }catch(e){} }
   const unlock=TOOLS.find(x=>x.from===level+1);
   saySeq([level===LAST?'all':'clear',...(unlock?[unlock.id]:[])]);
   for(let i=0;i<120;i++) fx.push({x:rand(0,W),y:rand(-H*.3,0),vx:rand(-40,40),vy:rand(60,260),life:rand(1.8,3),max:3,col:pick(['#ff8a2a','#ffd23f','#b36bff','#58e8ff','#ff7fc8','#ffffff']),s:rand(6,11),conf:true});
   const big=level===LAST;
   panel(`<h2><small>${level>LAST?'むげん '+(level-LAST):'ステージ '+level}</small>${big?'そうたろうくん！<br>ぜんぶ クリア！':'クリア！'}</h2>
     ${big?'<p>20ステージ ぜんぶ クリア！ つぎは「むげん ステージ」だよ。</p>':''}
+    ${level<=LAST?`<p>${fresh?'この ブヨンさんが、だいずかんに はいったよ！':'この ブヨンさんは、もう だいずかんに いるよ'}</p>`:''}
     ${unlock?`<div class="newtool"><canvas width="128" height="128" aria-hidden="true"></canvas>あたらしい どうぐ「${unlock.name}」！</div>`:''}
     <div class="btns"><button class="btn" id="next">つぎへ</button><button class="btn sub" id="again">もういちど</button></div>`);
   if(unlock) toolIcon(overlay.querySelector('.newtool canvas'),unlock.id);
