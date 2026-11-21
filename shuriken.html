@@ -52,6 +52,7 @@ html,body{height:100%;margin:0;overflow:hidden;overscroll-behavior:none;backgrou
 .btn.num.right{opacity:1;outline:4px solid #b8f5a0;outline-offset:3px}
 #sumMsg.no{color:#ff9a8a}
 #sumMsg.yes{color:#b8f5a0}
+.btns.six{display:grid;grid-template-columns:repeat(3,auto);gap:10px 12px;justify-content:center}
 .kq{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap}
 .kpic{display:block;width:clamp(96px,26vw,140px);height:clamp(96px,26vw,140px);background-repeat:no-repeat;background-color:#fff8ee;border-radius:20px;box-shadow:inset 0 0 0 3px #2a1440}
 .kword{display:flex;gap:6px}
@@ -437,9 +438,9 @@ function quiz(kind,html,right,onRight,sayRight,again){
 function askSum(){
   state='sum';
   let a,b; do{ a=1+(Math.random()*9|0); b=1+(Math.random()*9|0); }while(a+'+'+b===lastSum); lastSum=a+'+'+b;
-  const ans=a+b, wrong=[ans-1,ans+1,ans-2,ans+2].filter(n=>n>=2&&n<=18).sort(()=>Math.random()-.5).slice(0,2), ch=[ans,...wrong].sort(()=>Math.random()-.5);
+  const ans=a+b, wrong=[ans-1,ans+1,ans-2,ans+2,ans-3,ans+3,ans-4,ans+4,ans+5].filter(n=>n>=2&&n<=18).sort((x,y)=>Math.abs(x-ans)-Math.abs(y-ans)).slice(0,5), ch=[ans,...wrong].sort(()=>Math.random()-.5);   // six choices
   panel(`<h2><small>さいごに たしざん！</small><span class="sum" aria-label="${a} たす ${b} は？">${a} ＋ ${b} ＝ ？</span></h2><p id="sumMsg">こたえは どれかな？</p>
-    <div class="btns">${ch.map(n=>`<button class="btn num" data-n="${n}">${n}</button>`).join('')}</div>`);
+    <div class="btns six">${ch.map(n=>`<button class="btn num" data-n="${n}">${n}</button>`).join('')}</div>`);
   saySeq(['sum',`a/shuri/v/q_${a}_${b}.m4a`]);
   quiz('sum',()=>{ overlay.querySelector('.sum').textContent=`${a} ＋ ${b} ＝ ${ans}`; },ans,askKana,[`a/shuri/v/a_${a}_${b}.m4a`],askSum);
 }
@@ -447,12 +448,12 @@ function askSum(){
 const KWORDS=["りんご", "たぬき", "からす", "だるま", "めがね", "いぬ", "ねこ", "うさぎ", "くま", "さる", "ぞう", "きりん", "らいおん", "かえる", "かめ", "へび", "ふくろう", "すずめ", "はと", "にわとり", "ひよこ", "あひる", "ぶた", "うし", "うま", "ひつじ", "やぎ", "ねずみ", "りす", "きつね", "しか", "いのしし", "もぐら", "わに", "さかな", "たこ", "いか", "かに", "えび", "くじら", "いるか", "くらげ", "ひとで", "かい", "あり", "はち", "せみ", "とんぼ", "かぶとむし", "くわがた", "てんとうむし", "かたつむり", "くも", "みかん", "ぶどう", "いちご", "もも", "なし", "かき", "すいか", "くり", "さくらんぼ", "うめ", "だいこん", "にんじん", "たまねぎ", "なす", "とうもろこし", "えだまめ", "たまご", "おにぎり", "すし", "そば", "うどん", "ぱん", "もち", "だんご", "あめ", "せんべい", "なべ", "やかん", "さら", "はし", "おわん", "まないた", "れいぞうこ", "つくえ", "いす", "ほん", "えんぴつ", "けしごむ", "はさみ", "のり", "ふで", "かばん", "かさ", "くつ", "くつした", "ぼうし", "てぶくろ", "ゆかた", "きもの", "とけい", "かがみ", "くし", "はぶらし", "ふとん", "でんわ", "でんき", "まど", "いえ", "やね", "かぎ", "はしご", "ほうき", "ばけつ", "うえきばち", "はな", "き", "くさ", "たけ", "さくら", "ひまわり", "たんぽぽ", "あさがお", "きのこ", "どんぐり", "いし", "やま", "かわ", "うみ", "そら", "にじ", "たいよう", "つき", "ほし", "ゆき", "かみなり", "ゆきだるま", "くるま", "ふね", "ひこうき", "そり", "いかだ", "たいこ", "ふえ", "すず", "こま", "けんだま", "ふうせん", "つみき", "ぬいぐるみ", "なわとび", "すべりだい", "ぶらんこ", "すなば", "おに", "ろうそく", "ねぎ", "しいたけ", "ごぼう", "かぶ", "あんぱん", "おでん", "てんぷら", "やきいも", "たこやき", "わたがし", "あたま", "め", "みみ", "くち", "て", "あし", "ゆび", "ひげ", "かお", "へそ", "ほね", "はがき", "てがみ", "はこ", "つな", "ひも", "くぎ", "のこぎり", "かなづち", "ねじ", "かもめ", "つる", "わし", "たか", "おうむ", "めだか", "なまず", "ざりがに", "みのむし", "ぺんぎん", "かぜ", "もみじ"], KICONS=[{"fw": 226, "fh": 217}, {"fw": 226, "fh": 194}, {"fw": 226, "fh": 219}, {"fw": 226, "fh": 206}, {"fw": 226, "fh": 196}, {"fw": 226, "fh": 204}, {"fw": 226, "fh": 207}, {"fw": 226, "fh": 223}, {"fw": 224, "fh": 226}, {"fw": 226, "fh": 211}];
 const KROWS=['あいうえお','かきくけこ','さしすせそ','たちつてと','なにぬねの','はひふへほ','まみむめも','やゆよ','らりるれろ','わん','がぎぐげご','ざじずぜぞ','だでど','ばびぶべぼ','ぱぴぷぺぽ'];
 const KLOOK=['あお','ぬめ','ねれわ','はほま','さち','るろ','いり','くへ','しつ','こい','けは','きさ','たな','ゆよ','うら','そろ','ちら','すむ'];
-function kanaWrong(ans){
+function kanaWrong(ans,n=5){
   const pool=new Set();
   KLOOK.forEach(g=>{ if(g.includes(ans)) [...g].forEach(c=>c!==ans&&pool.add(c)); });
   const row=KROWS.find(r=>r.includes(ans)); if(row) [...row].forEach(c=>c!==ans&&pool.add(c));
-  const out=[...pool].sort(()=>Math.random()-.5).slice(0,2), all=KROWS.join('');
-  while(out.length<2){ const c=all[Math.random()*all.length|0]; if(c!==ans&&!out.includes(c)) out.push(c); }
+  const out=[...pool].sort(()=>Math.random()-.5).slice(0,n), all=KROWS.join('');
+  while(out.length<n){ const c=all[Math.random()*all.length|0]; if(c!==ans&&!out.includes(c)) out.push(c); }
   return out;
 }
 function askKana(){
@@ -465,7 +466,7 @@ function askKana(){
   panel(`<h2><small>つぎは ひらがな！</small></h2>
     <div class="kq"><span class="kpic" role="img" aria-label="え" style="background-image:url('a/icons/s${wi/20|0}.webp');${pos}"></span><span class="kword" aria-label="ことばの なかの はてなに はいる じは どれ？">${word(false)}</span></div>
     <p id="sumMsg">「？」に はいる じは どれかな？</p>
-    <div class="btns">${ch.map(c=>`<button class="btn num" data-n="${c}">${c}</button>`).join('')}</div>`);
+    <div class="btns six">${ch.map(c=>`<button class="btn num" data-n="${c}">${c}</button>`).join('')}</div>`);
   saySeq(['kana']);
   quiz('kana',()=>{ overlay.querySelector('.kword').innerHTML=word(true); },ans,clearStage,[`a/kana/w/w_${wi}.m4a`],askKana);
 }
