@@ -164,4 +164,6 @@ document.getElementById('backup').addEventListener('click',e=>{
 });
 addEventListener('keydown',e=>{ if(bk&&e.key==='Escape') closeBk(); });
 })();
+// coming back with the back button: count again
+addEventListener('pageshow',e=>{ if(e.persisted) location.reload(); });
 </script>

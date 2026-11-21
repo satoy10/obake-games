@@ -50,6 +50,7 @@ section h2 span{font-family:var(--f-round);font-weight:800;font-size:15px;color:
 @media (min-width:900px){.bgrid{grid-template-columns:repeat(4,1fr)}}
 .bgrid button{position:relative;display:block;width:100%;height:0;padding:0 0 100%;border:0;border-radius:18px;background:rgba(255,255,255,.06);cursor:pointer;overflow:hidden}
 .bgrid button.on{background:rgba(255,210,63,.16)}
+.bgrid button.mono{background:rgba(255,255,255,.1)}
 .bgrid button.boss{box-shadow:inset 0 0 0 3px #ffd23f}
 .bgrid canvas{position:absolute;left:0;top:0;width:100%;height:100%}
 .bgrid .nm{position:absolute;left:0;right:0;bottom:6px;text-align:center;font-family:var(--f-pop);font-weight:400;font-size:clamp(11px,2.4vw,17px);color:var(--cream);text-shadow:0 2px 0 #2a1440;white-space:nowrap}
@@ -441,6 +442,8 @@ function roundRect(x,y,w,h,r){ cx.beginPath(); cx.moveTo(x+r,y); cx.arcTo(x+w,y,
 let buyC={}, buyBest=1; try{ buyC=JSON.parse(localStorage.getItem('byp-caught')||'{}')||{}; buyBest=+localStorage.getItem('byp-stage')||1; }catch(e){}
 // stages cleared before the book knew ブヨンさん count too
 const hasBuyon=n=>buyC[n]>0||(n<=70&&n<buyBest);
+// met in おばけ しゅりけん: grey until knocked out in ブヨンパンチゲーム
+const monoBuyon=n=>!hasBuyon(n)&&((monoAll.buyon||{})[n]>0);
 function buyonCanvas(n,px,dark){
   const c=document.createElement('canvas'); c.width=c.height=px; drawBuyonAt(c,n);
   if(dark){ const g=c.getContext('2d'); g.globalCompositeOperation='source-in'; g.fillStyle='#6a58b0'; g.fillRect(0,0,px,px); g.globalCompositeOperation='source-over'; }
@@ -451,16 +454,16 @@ function buyonSection(){
   sec.innerHTML=`<h2>ブヨンさん <span>${n}／${BUYONS.length}</span></h2><div class="bgrid"></div>`;
   const grid=sec.querySelector('.bgrid');
   BUYONS.forEach((b,i)=>{
-    const st=i+1, got=hasBuyon(st), bt=document.createElement('button');
-    bt.className=(got?'on':'')+(st%5===0?' boss':''); bt.setAttribute('aria-label',got?b.n:'まだ たおしていない ブヨンさん');
-    bt.appendChild(buyonCanvas(st,360,!got));
-    const lab=document.createElement('span'); if(got){ lab.className='nm'; lab.textContent=b.n; } else { lab.className='q'; lab.textContent='？？？'; } bt.appendChild(lab);
-    bt.addEventListener('click',()=>{ if(got){ openBuyon(st,bt); say([`punch:n:${st}`]); } });
+    const st=i+1, got=hasBuyon(st), mo=monoBuyon(st), bt=document.createElement('button');
+    bt.className=(got?'on':mo?'mono':'')+(st%5===0?' boss':''); bt.setAttribute('aria-label',got?b.n:mo?b.n+'（しゅりけんで みつけた。まだ モノクロ）':'まだ たおしていない ブヨンさん');
+    const cv0=buyonCanvas(st,360,!got&&!mo); if(mo) cv0.style.filter='grayscale(1)'; bt.appendChild(cv0);
+    const lab=document.createElement('span'); if(got||mo){ lab.className='nm'; lab.textContent=b.n; } else { lab.className='q'; lab.textContent='？？？'; } bt.appendChild(lab);
+    bt.addEventListener('click',()=>{ if(got||mo){ openBuyon(st,bt,mo); say([`punch:n:${st}`]); } });
     grid.appendChild(bt);
   });
   return sec;
 }
-function openBuyon(st,from){
+function openBuyon(st,from,mo=false){
   closeCard(true); cardReturn=from||cardReturn;
   const b=BUYONS[st-1], list=BUYONS.map((x,i)=>i+1).filter(hasBuyon), pos=list.indexOf(st);
   const m=document.createElement('div'); m.className='modal';
@@ -468,15 +471,15 @@ function openBuyon(st,from){
     <div class="no">ブヨンさん No.${String(st).padStart(2,'0')}</div><div class="rare">${st%5===0?'★★★ ボス！':'ブヨンパンチゲーム ステージ '+st}</div>
     <h3 id="cardName"></h3><p id="cardFeat"></p><p class="count"></p>
     <div class="row"><button class="btn sub" id="cardRead">よんで！</button><button class="btn" id="cardClose">とじる</button></div>
-    ${list.length>1?'<button class="nav prev" id="cardPrev" aria-label="まえの ブヨンさん">‹</button><button class="nav next" id="cardNext" aria-label="つぎの ブヨンさん">›</button>':''}
+    ${!mo&&list.length>1?'<button class="nav prev" id="cardPrev" aria-label="まえの ブヨンさん">‹</button><button class="nav next" id="cardNext" aria-label="つぎの ブヨンさん">›</button>':''}
   </div>`;
   const big=buyonCanvas(st,520,false); big.setAttribute('role','img'); big.setAttribute('aria-label',b.n);
   m.querySelector('.card').insertBefore(big,m.querySelector('h3'));
-  fitName(m.querySelector('#cardName'),b.n); m.querySelector('#cardFeat').textContent=b.f;
-  m.querySelector('.count').textContent=buyC[st]>0?`やっつけた かず　${buyC[st]}かい`:'';
+  fitName(m.querySelector('#cardName'),b.n); m.querySelector('#cardFeat').textContent=mo?'しゅりけんで みつけた ブヨンさん。ブヨンパンチゲームで たおすと、いろが つくよ！':b.f;
+  m.querySelector('.count').textContent=buyC[st]>0?`やっつけた かず　${buyC[st]}かい`:''; if(mo) big.style.filter='grayscale(1)';
   m.addEventListener('click',e=>{ if(e.target===m) closeCard(); });
   m.querySelector('#cardClose').addEventListener('click',()=>closeCard());
-  m.querySelector('#cardRead').addEventListener('click',()=>say([`punch:n:${st}`,`punch:f:${st}`]));
+  m.querySelector('#cardRead').addEventListener('click',()=>say(mo?[`punch:n:${st}`]:[`punch:n:${st}`,`punch:f:${st}`]));
   const step=d=>{ const s2=list[(pos+d+list.length)%list.length]; openBuyon(s2); say([`punch:n:${s2}`]); };
   m.querySelector('#cardPrev')?.addEventListener('click',()=>step(-1));
   m.querySelector('#cardNext')?.addEventListener('click',()=>step(1));
@@ -549,5 +552,7 @@ addEventListener('keydown',e=>{ if(!cardEl) return; if(e.key==='Escape') closeCa
   try{ await document.fonts.load('40px "Mochiy Pop One"'); }catch(e){}
   render();
 })();
+// coming back with the back button shows the page as it was: read the records again
+addEventListener('pageshow',e=>{ if(e.persisted) location.reload(); });
 })();
 </script>

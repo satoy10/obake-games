@@ -285,11 +285,13 @@ function hintNow(){
   else if(have.includes('pillow')) s='まくらで ふっとばせ！';
   if(s) texts.push({s,x:W/2,y:HOME.y+R*1.55,t:-.1,big:true,col:'#ffd23f',long:true});
 }
+let freshBuyon=false;
 function knockout(dir){
+  recordBuyon();
   const g=gh; g.alive=false; state='ko'; slow=.25; g.face='ko'; shake=20; sfx.ko(); say('ko');
   g.flying={vx:dir*W*1.3,vy:-H*1.5,vr:dir*14,s:1};
   setTimeout(()=>{ slow=1; },380);
-  setTimeout(()=>{ texts.push({s:'キラーン☆',x:W*(dir>0?.82:.18),y:H*.14,t:0,big:true,col:'#ffd23f'}); },1300);
+  setTimeout(()=>{ texts.push({s:'キラーン☆',x:W*(dir>0?.82:.18),y:H*.14,t:0,big:true,col:'#ffd23f'}); if(level<=BUYONS.length) texts.push({s:freshBuyon?'ずかんに はいった！':'ずかんに いるよ',x:W/2,y:H*.24,t:0,col:'#ffffff'}); },1300);
   setTimeout(()=>{ if(state==='ko') askSum(); },2300);
   hud(); buildTools();
 }
@@ -396,12 +398,17 @@ function askHiki(){
   });
 }
 
+// a ブヨンさん knocked out is in the book straight away, even if the child stops at the sums
+function recordBuyon(){
+  freshBuyon=false; if(level>BUYONS.length) return;
+  try{ const c=JSON.parse(localStorage.getItem('byp-caught')||'{}')||{}; freshBuyon=!c[level]; c[level]=(c[level]||0)+1; localStorage.setItem('byp-caught',JSON.stringify(c)); }catch(e){}
+}
+
 // ---------- clear ----------
 function clearStage(){
   state='clear'; sfx.clear(); hud();
   best=Math.max(best,level+1); save();
-  let fresh=false;
-  if(level<=BUYONS.length){ try{ const c=JSON.parse(localStorage.getItem('byp-caught')||'{}')||{}; fresh=!c[level]; c[level]=(c[level]||0)+1; localStorage.setItem('byp-caught',JSON.stringify(c)); }catch(e){} }
+  const fresh=freshBuyon;
   const unlock=TOOLS.find(x=>x.from===level+1);
   saySeq([level===LAST?'all':'clear',...(unlock?[unlock.id]:[])]);
   for(let i=0;i<120;i++) fx.push({x:rand(0,W),y:rand(-H*.3,0),vx:rand(-40,40),vy:rand(60,260),life:rand(1.8,3),max:3,col:pick(['#ff8a2a','#ffd23f','#b36bff','#58e8ff','#ff7fc8','#ffffff']),s:rand(6,11),conf:true});
@@ -804,7 +811,7 @@ function drawLabel(s,x,y,size,col){ cx.save(); cx.font=`${size}px "Mochiy Pop On
 function roundRect(x,y,w,h,r){ cx.beginPath(); cx.moveTo(x+r,y); cx.arcTo(x+w,y,x+w,y+h,r); cx.arcTo(x+w,y+h,x,y+h,r); cx.arcTo(x,y+h,x,y,r); cx.arcTo(x,y,x+w,y,r); cx.closePath(); }
 
 let last=performance.now();
-function loop(now){ const dt=Math.min(.05,(now-last)/1000); last=now; update(dt); draw(); requestAnimationFrame(loop); }
+function loop(now){ requestAnimationFrame(loop); const dt=Math.min(.05,(now-last)/1000); last=now; try{ update(dt); draw(); }catch(e){ console.error(e); } }   // one bad frame (a tiny window) must not stop the game
 $('snd').setAttribute('aria-pressed',soundOn);
 $('snd').addEventListener('click',e=>{ soundOn=!soundOn; e.currentTarget.setAttribute('aria-pressed',soundOn); save(); ensureAudio(); });
 new ResizeObserver(resize).observe($('stage'));
