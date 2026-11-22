@@ -57,6 +57,13 @@ html,body{height:100%;margin:0;overflow:hidden;overscroll-behavior:none;backgrou
 .kq{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap}
 .kpic{display:block;width:clamp(96px,26vw,140px);height:clamp(96px,26vw,140px);background-repeat:no-repeat;background-color:#fff8ee;border-radius:20px;box-shadow:inset 0 0 0 3px #2a1440}
 .kword{display:flex;gap:6px}
+.kpop{position:absolute;inset:0;z-index:6;display:grid;place-items:center;padding:10px;background:rgba(20,12,38,.85);pointer-events:auto}
+.kpopc{display:flex;flex-direction:column;align-items:center;gap:10px;padding:14px;border-radius:22px;background:#fff8ee;color:#2a1440;box-shadow:0 0 0 4px #ffd23f;max-width:100%;box-sizing:border-box}
+.kpt{margin:0;font:400 clamp(14px,3.6vw,18px) var(--f-pop)}
+.ktab{display:grid;direction:rtl;grid-auto-flow:column;grid-template-rows:repeat(5,var(--c));grid-auto-columns:var(--c);gap:3px;--c:min(calc((100vw - 76px) / var(--cols) - 3px),calc((100vh - 200px) / 5 - 3px),54px)}
+.kt{display:grid;place-items:center;border-radius:8px;background:#fff;box-shadow:inset 0 0 0 2px #d8cdee;font:600 calc(var(--c) * .68) 'Klee One','Hiragino Mincho ProN',serif;line-height:1}
+.kt.e{background:none;box-shadow:none}
+.kt.q{background:#efe6ff;color:#8a4be0;box-shadow:inset 0 0 0 3px #8a4be0;font-family:var(--f-pop)}
 .bigl{position:absolute;inset:0;z-index:5;display:grid;place-items:center;background:rgba(20,12,38,.94);pointer-events:auto;animation:bigin .3s ease-out}
 .bigl div{display:flex;flex-direction:column;align-items:center}
 .bigl small{font:400 clamp(24px,6vw,40px) var(--f-pop);color:#ffd23f}
@@ -470,7 +477,9 @@ function addHint(html,onShow){
   const p=overlay.querySelector('.panel'); if(!p) return;
   const b=document.createElement('button'); b.className='btn sub hintbtn'; b.textContent='💡 ヒント';
   const box=document.createElement('div'); box.className='hint'; box.hidden=true; box.innerHTML=html||'';
-  b.onclick=()=>{ b.remove(); if(html) box.hidden=false; if(onShow) onShow(); saySeq(['qhint']); };
+  // a popup hint ({popup:html}) can be opened again; the others show once under the question
+  if(html&&html.popup){ const pop=html.popup; b.onclick=()=>{ openPop(pop); saySeq(['qhint']); }; html=''; }
+  else b.onclick=()=>{ b.remove(); if(html) box.hidden=false; if(onShow) onShow(); saySeq(['qhint']); };
   const btns=p.querySelector('.btns'); p.insertBefore(box,btns); p.appendChild(b);
   p.querySelectorAll('.num').forEach(n=>n.addEventListener('click',()=>b.remove()));   // answered: no hint any more
 }
@@ -481,7 +490,24 @@ const hintAdd=(a,b)=>`<div class="frow">${fruits(a)}<b>＋</b>${fruits(b)}</div>
 const hintAddX=(a,b)=>`<div class="frow">${fruits(a)}<b>＋</b>${empties(b-a)}</div><p>${b}こに するには、あと いくつ？</p>`;
 const hintSub=(a,b)=>`<div class="frow">${fruits(a,i=>i>=a-b?'x':'')}</div><p>${b}こ たべたら、のこりは いくつ？</p>`;
 const hintSubX=(a,b)=>`<div class="frow">${fruits(a,i=>i>=b?'x':'')}</div><p>${b}こ のこすには、いくつ たべる？</p>`;
-const hintKana=ans=>{ const row=KROWS.find(r=>r.includes(ans)); return row?`<div class="kword hrow">${[...row].map(c=>`<span class="kc${c===ans?' blank':''}">${c===ans?'？':c}</span>`).join('')}</div><p>「${row[0]}」の なかまの じ だよ</p>`:''; };
+// the hiragana hint: the kana table, written the Japanese way (columns from the right, read downwards), the answer as ？.
+// Only the table the answer belongs to: plain letters, or the ones with ゛゜, or the small ones, so it is not too much.
+const KTABLES=[
+  ['あいうえお','かきくけこ','さしすせそ','たちつてと','なにぬねの','はひふへほ','まみむめも','や ゆ よ','らりるれろ','わ   を','ん    '],
+  ['がぎぐげご','ざじずぜぞ','だぢづでど','ばびぶべぼ','ぱぴぷぺぽ'],
+  ['ぁぃぅぇぉ','ゃ ゅ ょ','っ    '],
+];
+function openPop(html){
+  const d=document.createElement('div'); d.className='kpop'; d.setAttribute('role','dialog'); d.setAttribute('aria-label','ひらがなの ひょう');
+  d.innerHTML=`<div class="kpopc">${html}<button class="btn sub" id="kpopx">とじる</button></div>`;
+  overlay.appendChild(d); const x=d.querySelector('#kpopx'); x.focus({preventScroll:true});
+  const close=()=>d.remove(); x.onclick=close; d.addEventListener('click',e=>{ if(e.target===d) close(); });
+}
+const hintKana=ans=>{
+  const T=KTABLES.find(t=>t.some(c=>c.includes(ans))); if(!T) return '';
+  const cells=T.map(col=>[...col.padEnd(5,' ')].map(c=>c===' '?'<span class="kt e"></span>':c===ans?'<span class="kt q">？</span>':`<span class="kt">${c}</span>`).join('')).join('');
+  return {popup:`<p class="kpt">「？」に はいる じは どれかな？</p><div class="ktab" style="--cols:${T.length}">${cells}</div>`};
+};
 // after a hiragana question, right or wrong: the right letter, big, in the textbook hand, with 「これが、た」
 function bigLetter(ch,then){
   state='big';
