@@ -721,7 +721,7 @@ function update(dt){
   }
 }
 function afterThrow(){
-  if(ghosts.every(g=>!g.alive)){ state='clearing'; setTimeout(askSum,900); return; }
+  if(ghosts.every(g=>!g.alive)){ state='clearing'; hwSave(); setTimeout(askSum,900); return; }
   if(throwsLeft<=0){ state='failing'; setTimeout(failStage,700); }
 }
 // after the last ghost: a sum, then a hiragana word. A wrong answer shows the right one and brings a NEW question,
@@ -897,7 +897,7 @@ function askWrite(next){
 }
 
 function clearStage(){
-  state='clear'; sfx.clear();
+  hwClear(); state='clear'; sfx.clear();
   // the ghosts of this stage go into the books in grey (colour comes from catching them in their own game)
   const mono=readJ('obs-caught'); let fresh=0;
   const row=ghosts.map(g=>{ const col=readJ(g.set==='buyon'?'byp-caught':BOOK[g.set]+'caught')[g.id]>0, was=(mono[g.set]||{})[g.id]>0; (mono[g.set]=mono[g.set]||{})[g.id]=1; if(!col&&!was) fresh++; return {g,col}; });
@@ -933,6 +933,19 @@ function goodbye(){
     <div class="btns"><a class="btn" id="home" href="index.html">ほかの ゲームへ</a></div>`);
   const once=()=>{ removeEventListener('pointerdown',once,true); removeEventListener('keydown',once,true); say('bye'); };
   addEventListener('pointerdown',once,true); addEventListener('keydown',once,true);
+}
+// homework not finished: leaving and coming back starts with it, not with the game
+const HW='obs-hw';
+function hwSave(){ try{ localStorage.setItem(HW,JSON.stringify({level,t:throwsLeft,g:ghosts.map(g=>[g.set,g.id])})); }catch(e){} }
+function hwClear(){ try{ localStorage.removeItem(HW); }catch(e){} }
+function hwResume(){ let h=null; try{ h=JSON.parse(localStorage.getItem(HW)||'null'); }catch(e){} if(!h||!(h.level>0)) return false;
+  level=h.level; def=stageDef(level); throwsLeft=h.t||0; ghosts=(h.g||[]).map(([set,id])=>({set,id,alive:false})); resumePanel(); hud(); return true; }
+function resumePanel(){
+  state='title';
+  panel(`<h2><small>${level>LAST?'むげん '+(level-LAST):'ステージ '+level}</small>しゅくだいの つづき</h2>
+    <p>ゲームの あとの しゅくだいが、まだ おわっていないよ。<br>6もん とけたら、つぎへ すすめるよ！</p>
+    <div class="btns"><button class="btn" id="go">しゅくだいを する</button></div>`);
+  $('go').onclick=()=>{ ensureAudio(); askSum(); };
 }
 function titlePanel(){
   state='title';
@@ -1013,7 +1026,7 @@ new ResizeObserver(resize).observe($('stage'));
   try{ const [crew,hall]=await Promise.all([loadImg(CREWA.src),loadImg(HALL)]); CREWCOL.forEach((c,i)=>crewCan[i]=recolor(crew,c)); hallImg=hall; }catch(e){}
   for(let i=0;i<6;i++){ const g=randomGhost(); titleG.push(g); sheet(g.set,g.id/20|0); }
   try{ await document.fonts.load('40px "Mochiy Pop One"'); }catch(e){}
-  hud(); titlePanel(); requestAnimationFrame(loop);
+  hud(); if(!hwResume()) titlePanel(); requestAnimationFrame(loop);
 })();
 })();
 </script>

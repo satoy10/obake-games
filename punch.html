@@ -323,7 +323,7 @@ function knockout(dir){
   g.flying={vx:dir*W*1.3,vy:-H*1.5,vr:dir*14,s:1};
   setTimeout(()=>{ slow=1; },380);
   setTimeout(()=>{ texts.push({s:'キラーン☆',x:W*(dir>0?.82:.18),y:H*.14,t:0,big:true,col:'#ffd23f'}); if(level<=BUYONS.length) texts.push({s:freshBuyon?'ずかんに はいった！':'ずかんに いるよ',x:W/2,y:H*.24,t:0,col:'#ffffff'}); },1300);
-  setTimeout(()=>{ if(state==='ko') askSum(); },2300);
+  hwSave(); setTimeout(()=>{ if(state==='ko') askSum(); },2300);
   hud(); buildTools();
 }
 
@@ -544,7 +544,7 @@ function askWrite(next){
 
 // ---------- clear ----------
 function clearStage(){
-  state='clear'; sfx.clear(); hud();
+  hwClear(); state='clear'; sfx.clear(); hud();
   best=Math.max(best,level+1); save();
   const fresh=freshBuyon;
   const unlock=TOOLS.find(x=>x.from===level+1);
@@ -560,6 +560,19 @@ function clearStage(){
   $('next').onclick=()=>startLevel(level+1); $('again').onclick=()=>startLevel(level);
 }
 function panel(html){ const p=document.createElement('div'); p.className='panel'; p.setAttribute('role','dialog'); p.innerHTML=html; overlay.innerHTML=''; overlay.appendChild(p); p.querySelector('button')?.focus({preventScroll:true}); }
+// homework not finished: leaving and coming back starts with it, not with the game
+const HW='byp-hw';
+function hwSave(){ try{ localStorage.setItem(HW,JSON.stringify({level,fresh:freshBuyon})); }catch(e){} }
+function hwClear(){ try{ localStorage.removeItem(HW); }catch(e){} }
+function hwResume(){ let h=null; try{ h=JSON.parse(localStorage.getItem(HW)||'null'); }catch(e){} if(!h||!(h.level>0)) return false;
+  level=h.level; def=stageDef(level); freshBuyon=!!h.fresh; resumePanel(); return true; }
+function resumePanel(){
+  state='title';
+  panel(`<h2><small>${level>LAST?'むげん '+(level-LAST):'ステージ '+level}</small>しゅくだいの つづき</h2>
+    <p>ゲームの あとの しゅくだいが、まだ おわっていないよ。<br>6もん とけたら、つぎへ すすめるよ！</p>
+    <div class="btns"><button class="btn" id="go">しゅくだいを する</button></div>`);
+  $('go').onclick=()=>{ ensureAudio(); askSum(); };
+}
 function titlePanel(){
   state='title'; def=null; gh=newBuyon({hp:1,boss:false,color:0,acc:'none'}); gh.face='tease'; hud(); buildTools();
   panel(`<h2><small>いたずらな あいつを やっつけろ！</small>ブヨン<br>パンチゲーム</h2>
@@ -998,7 +1011,7 @@ window.__bp={get state(){ return state; }, get gh(){ return gh; }, startLevel, a
 (async()=>{
   resize();
   try{ await document.fonts.load('40px "Mochiy Pop One"'); }catch(e){}
-  titlePanel(); requestAnimationFrame(loop);
+  if(!hwResume()) titlePanel(); requestAnimationFrame(loop);
 })();
 })();
 </script>
