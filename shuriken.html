@@ -834,7 +834,7 @@ function askHikiX(next){
 }
 // まねして かこう: a word and its picture, one letter circled; the child traces that letter with a finger in a big box.
 // The box shows the letter faintly (教科書体 Klee One) to trace. It passes when the ink lies on the letter and covers most of it.
-// A miss keeps the same letter (writing cannot be guessed), so the child simply tries again.
+// A miss brings a different word and letter, the same as the other questions.
 const WFONT='600 1px "Klee One","Hiragino Mincho ProN",serif', SKIPW='ゃゅょっぁぃぅぇぉー';
 let lastW='';
 function glyph(c,ctx,size,ch){ ctx.font=WFONT.replace('1px',Math.round(size*.78)+'px'); ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(ch,size/2,size*.53); }
@@ -888,8 +888,9 @@ function askWrite(next){
       if(ok()){ const tt=ac.currentTime; tone(1047,tt,.18,'sine',.12); tone(1568,tt+.14,.4,'sine',.12); }
       saySeq([`a/kana/w/w_${wi}.m4a`]); setTimeout(next,1900);
     }else{
-      busy=true; if(sfx.boo) sfx.boo(); msg.textContent=sc.on<.75?'おしい！ うすい じの うえを なぞってみよう':'おしい！ ぜんぶ なぞってみよう'; msg.className='no'; saySeq(['retry']);
-      setTimeout(()=>{ strokes=[]; redraw(); busy=false; },1400);
+      // a miss brings a different letter, the same way as the other questions
+      busy=true; state='write-wrong'; if(sfx.boo) sfx.boo(); msg.textContent='ざんねん！ あたらしい もんだいだよ'; msg.className='no'; saySeq(['wrong']);
+      setTimeout(()=>{ if(state==='write-wrong') askWrite(next); },2600);
     }
   };
   window.__write={ans,S,score:st=>inkScore(ans,st,S)};   // for checking
