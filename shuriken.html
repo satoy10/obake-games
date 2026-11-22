@@ -56,6 +56,11 @@ html,body{height:100%;margin:0;overflow:hidden;overscroll-behavior:none;backgrou
 .kq{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap}
 .kpic{display:block;width:clamp(96px,26vw,140px);height:clamp(96px,26vw,140px);background-repeat:no-repeat;background-color:#fff8ee;border-radius:20px;box-shadow:inset 0 0 0 3px #2a1440}
 .kword{display:flex;gap:6px}
+.bigl{position:absolute;inset:0;z-index:5;display:grid;place-items:center;background:rgba(20,12,38,.94);pointer-events:auto;animation:bigin .3s ease-out}
+.bigl div{display:flex;flex-direction:column;align-items:center}
+.bigl small{font:400 clamp(24px,6vw,40px) var(--f-pop);color:#ffd23f}
+.bigl span{font:600 min(62vw,52vh) 'Klee One','Hiragino Mincho ProN',serif;line-height:1.05;color:#fff8ee;text-shadow:0 6px 0 #2a1440}
+@keyframes bigin{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
 .eq{display:flex;align-items:center;justify-content:center;gap:14px}
 .epic{font-size:clamp(64px,18vw,96px);line-height:1}
 .eja{font:400 clamp(28px,8vw,44px) var(--f-pop)}
@@ -798,7 +803,7 @@ function askKana(){
     <p id="sumMsg">「？」に はいる じは どれかな？</p>
     <div class="btns six">${ch.map(c=>`<button class="btn num" data-n="${c}">${c}</button>`).join('')}</div>`);
   addHint(hintKana(ans)); saySeq(['kana']);
-  quiz('kana',()=>{ overlay.querySelector('.kword').innerHTML=word(true); },ans,()=>askWrite(askHiki),[`a/kana/w/w_${wi}.m4a`],askKana);
+  quiz('kana',()=>{ overlay.querySelector('.kword').innerHTML=word(true); },ans,()=>bigLetter(ans,()=>askWrite(askHiki)),[`a/kana/w/w_${wi}.m4a`],()=>bigLetter(ans,askKana));
 }
 // the last question: a subtraction, read with the ひきざん game's recordings
 let lastHiki='';
@@ -831,6 +836,14 @@ const hintAddX=(a,b)=>`<div class="frow">${fruits(a)}<b>＋</b>${empties(b-a)}</
 const hintSub=(a,b)=>`<div class="frow">${fruits(a,i=>i>=a-b?'x':'')}</div><p>${b}こ たべたら、のこりは いくつ？</p>`;
 const hintSubX=(a,b)=>`<div class="frow">${fruits(a,i=>i>=b?'x':'')}</div><p>${b}こ のこすには、いくつ たべる？</p>`;
 const hintKana=ans=>{ const row=KROWS.find(r=>r.includes(ans)); return row?`<div class="kword hrow">${[...row].map(c=>`<span class="kc${c===ans?' blank':''}">${c===ans?'？':c}</span>`).join('')}</div><p>「${row[0]}」の なかまの じ だよ</p>`:''; };
+// after a hiragana question, right or wrong: the right letter, big, in the textbook hand, with 「これが、た」
+function bigLetter(ch,then){
+  state='big';
+  const d=document.createElement('div'); d.className='bigl'; d.setAttribute('role','img'); d.setAttribute('aria-label',`これが ${ch}`);
+  d.innerHTML=`<div><small>これが</small><span>${ch}</span></div>`; overlay.appendChild(d);
+  const c=ch.codePointAt(0); saySeq(c>=0x3041&&c<=0x3094?[`a/shuri/x/kl_${c.toString(16)}.m4a`]:[]);
+  setTimeout(()=>{ d.remove(); then(); },2800);
+}
 const prog=n=>`<span class="prog" aria-label="8もん ちゅう ${n}もんめ">${[1,2,3,4,5,6,7,8].map(i=>i<=n?'●':'○').join('')}</span>`;
 function quiz2(kind,right,onRight,showRight,sayRight,again){
   const btns=[...overlay.querySelectorAll('.num')];
