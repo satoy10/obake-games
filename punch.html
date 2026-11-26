@@ -403,7 +403,7 @@ function askSum(){
     overlay.querySelector('.sum').textContent=`${a} ＋ ${b} ＝ ${ans}`;
     if(bt===right){
       state='summed'; msg.textContent='せいかい！'; msg.className='yes';
-      sfx.yes(); saySeq([`a/shuri/v/a_${a}_${b}.m4a`]); setTimeout(()=>askSumX(()=>askRead(()=>askWrite(askHiki))),1900);
+      sfx.yes(); saySeq([`a/shuri/v/a_${a}_${b}.m4a`]); setTimeout(()=>askRead(askHiki),1900);
     }else{
       // show the right answer, then a different sum: pressing all three does not get through
       state='wrong'; sfx.boo(); msg.textContent='ざんねん！ あたらしい もんだいだよ'; msg.className='no';
@@ -456,7 +456,7 @@ function askHiki(){
   state='hiki';
   let a,b; do{ a=2+(Math.random()*9|0); b=1+(Math.random()*(a-1)|0); }while(a+'-'+b===lastHiki); lastHiki=a+'-'+b;
   const ans=a-b, wrong=[ans-1,ans+1,ans-2,ans+2,ans-3,ans+3,ans-4,ans+4,ans+5,ans-5].filter(n=>n>=0&&n<=9).sort((x,y)=>Math.abs(x-ans)-Math.abs(y-ans)).slice(0,5), ch=[ans,...wrong].sort(()=>Math.random()-.5);
-  panel(`<h2><small>つぎは ひきざん！ ${prog(5)}</small><span class="sum" aria-label="${a} ひく ${b} は？">${a} − ${b} ＝ ？</span></h2><p id="sumMsg">こたえは どれかな？</p>
+  panel(`<h2><small>つぎは ひきざん！ ${prog(3)}</small><span class="sum" aria-label="${a} ひく ${b} は？">${a} − ${b} ＝ ？</span></h2><p id="sumMsg">こたえは どれかな？</p>
     <div class="btns six">${ch.map(n=>`<button class="btn num" data-n="${n}">${n}</button>`).join('')}</div>`);
   addHint(hintSub(a,b)); saySeq(['hiki',`a/shuri/h/q_${a}_${b}.m4a`]);
   const btns=[...overlay.querySelectorAll('.num')];
@@ -465,7 +465,7 @@ function askHiki(){
     const msg=$('sumMsg'), right=btns.find(x=>+x.dataset.n===ans);
     btns.forEach(x=>x.disabled=true); right.disabled=false; right.classList.add('right');
     overlay.querySelector('.sum').textContent=`${a} − ${b} ＝ ${ans}`;
-    if(bt===right){ state='hikied'; msg.textContent='せいかい！'; msg.className='yes'; sfx.yes(); saySeq([`a/shuri/h/a_${a}_${b}.m4a`]); setTimeout(()=>askHikiX(()=>askEng(()=>askFlag(clearStage))),1900); }
+    if(bt===right){ state='hikied'; msg.textContent='せいかい！'; msg.className='yes'; sfx.yes(); saySeq([`a/shuri/h/a_${a}_${b}.m4a`]); setTimeout(()=>askEng(clearStage),1900); }
     else{ state='hiki-wrong'; sfx.boo(); msg.textContent='ざんねん！ あたらしい もんだいだよ'; msg.className='no'; saySeq([`a/shuri/h/a_${a}_${b}.m4a`,'wrong']); setTimeout(()=>{ if(state==='hiki-wrong') askHiki(); },3400); }
   });
 }
@@ -523,7 +523,7 @@ function bigLetter(ch,then){
   const c=ch.codePointAt(0); saySeq(c>=0x3041&&c<=0x3094?[`a/shuri/x/kl_${c.toString(16)}.m4a`]:[]);
   setTimeout(()=>{ d.remove(); then(); },2800);
 }
-const prog=n=>`<span class="prog" aria-label="8もん ちゅう ${n}もんめ">${[1,2,3,4,5,6,7,8].map(i=>i<=n?'●':'○').join('')}</span>`;
+const prog=n=>`<span class="prog" aria-label="4もん ちゅう ${n}もんめ">${[1,2,3,4].map(i=>i<=n?'●':'○').join('')}</span>`;
 function quiz2(kind,right,onRight,showRight,sayRight,again){
   const btns=[...overlay.querySelectorAll('.num')];
   btns.forEach(bt=>bt.onclick=()=>{
@@ -639,7 +639,7 @@ function askRead(next){
   const w=[...KWORDS[wi]], score=j=>{ const v=[...KWORDS[j]]; let k=0; v.forEach((c,i)=>{ if(w[i]===c) k+=2; else if(w.includes(c)) k+=1; }); return k-(v.length===w.length?0:2)+Math.random()*1.5; };
   const others=KWORDS.map((x,j)=>j).filter(j=>j!==wi&&KWORDS[j]!==KWORDS[wi]).sort((a,b)=>score(b)-score(a)).slice(0,2);
   const ch=[wi,...others].sort(()=>Math.random()-.5);
-  panel(`<h2><small>よんで えらぼう！ ${prog(3)}</small></h2>
+  panel(`<h2><small>よんで えらぼう！ ${prog(2)}</small></h2>
     <div class="kword rword" aria-label="${KWORDS[wi]}">${w.map(c=>`<span class="kc">${c}</span>`).join('')}</div>
     <p id="sumMsg">この ことばの えは どれかな？</p>
     <div class="btns three">${ch.map(j=>`<button class="btn num pick" data-n="${j}" aria-label="${KWORDS[j]}"><span class="kpic" style="${picStyle(j)}"></span><small></small></button>`).join('')}</div>`);
@@ -657,7 +657,7 @@ function askEng(next){
   state='eng';
   let i; do{ i=Math.random()*ENG.length|0; }while(i===lastE); lastE=i;
   const e=ENG[i], ch=two(i,ENG,x=>x.c===e.c);
-  panel(`<h2><small>えいご！ ${prog(7)}</small></h2>
+  panel(`<h2><small>さいごは えいご！ ${prog(4)}</small></h2>
     <div class="eq"><span class="epic" role="img" aria-label="${e.j}">${e.p}</span><span class="eja">${e.j}</span></div>
     <p id="sumMsg">「${e.j}」は えいごで どっち？</p>
     <div class="btns two">${ch.map(k=>`<button class="btn num eng" data-n="${k}"><span lang="en">${ENG[k].w}</span><small>${ENG[k].k}</small></button>`).join('')}</div>`);
@@ -706,7 +706,7 @@ function hwResume(){ let h=null; try{ h=JSON.parse(localStorage.getItem(HW)||'nu
 function resumePanel(){
   state='title';
   panel(`<h2><small>${level>LAST?'むげん '+(level-LAST):'ステージ '+level}</small>しゅくだいの つづき</h2>
-    <p>ゲームの あとの しゅくだいが、まだ おわっていないよ。<br>8もん とけたら、つぎへ すすめるよ！</p>
+    <p>ゲームの あとの しゅくだいが、まだ おわっていないよ。<br>4もん とけたら、つぎへ すすめるよ！</p>
     <div class="btns"><button class="btn" id="go">しゅくだいを する</button></div>`);
   $('go').onclick=()=>{ ensureAudio(); askSum(); };
 }

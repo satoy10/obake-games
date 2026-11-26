@@ -816,7 +816,7 @@ function askSum(){
   panel(`<h2><small>まずは たしざん！ ${prog(1)}</small><span class="sum" aria-label="${a} たす ${b} は？">${a} ＋ ${b} ＝ ？</span></h2><p id="sumMsg">こたえは どれかな？</p>
     <div class="btns six">${ch.map(n=>`<button class="btn num" data-n="${n}">${n}</button>`).join('')}</div>`);
   addHint(hintAdd(a,b)); saySeq(['sum',`a/shuri/v/q_${a}_${b}.m4a`]);
-  quiz('sum',()=>{ overlay.querySelector('.sum').textContent=`${a} ＋ ${b} ＝ ${ans}`; },ans,()=>askSumX(()=>askRead(()=>askWrite(askHiki))),[`a/shuri/v/a_${a}_${b}.m4a`],askSum);
+  quiz('sum',()=>{ overlay.querySelector('.sum').textContent=`${a} ＋ ${b} ＝ ${ans}`; },ans,()=>askRead(askHiki),[`a/shuri/v/a_${a}_${b}.m4a`],askSum);
 }
 // the hiragana question: a picture and its word with one letter missing (the words and pictures of おばけ ひらがな)
 const KWORDS=["りんご", "たぬき", "からす", "だるま", "めがね", "いぬ", "ねこ", "うさぎ", "くま", "さる", "ぞう", "きりん", "らいおん", "かえる", "かめ", "へび", "ふくろう", "すずめ", "はと", "にわとり", "ひよこ", "あひる", "ぶた", "うし", "うま", "ひつじ", "やぎ", "ねずみ", "りす", "きつね", "しか", "いのしし", "もぐら", "わに", "さかな", "たこ", "いか", "かに", "えび", "くじら", "いるか", "くらげ", "ひとで", "かい", "あり", "はち", "せみ", "とんぼ", "かぶとむし", "くわがた", "てんとうむし", "かたつむり", "くも", "みかん", "ぶどう", "いちご", "もも", "なし", "かき", "すいか", "くり", "さくらんぼ", "うめ", "だいこん", "にんじん", "たまねぎ", "なす", "とうもろこし", "えだまめ", "たまご", "おにぎり", "すし", "そば", "うどん", "ぱん", "もち", "だんご", "あめ", "せんべい", "なべ", "やかん", "さら", "はし", "おわん", "まないた", "れいぞうこ", "つくえ", "いす", "ほん", "えんぴつ", "けしごむ", "はさみ", "のり", "ふで", "かばん", "かさ", "くつ", "くつした", "ぼうし", "てぶくろ", "ゆかた", "きもの", "とけい", "かがみ", "くし", "はぶらし", "ふとん", "でんわ", "でんき", "まど", "いえ", "やね", "かぎ", "はしご", "ほうき", "ばけつ", "うえきばち", "はな", "き", "くさ", "たけ", "さくら", "ひまわり", "たんぽぽ", "あさがお", "きのこ", "どんぐり", "いし", "やま", "かわ", "うみ", "そら", "にじ", "たいよう", "つき", "ほし", "ゆき", "かみなり", "ゆきだるま", "くるま", "ふね", "ひこうき", "そり", "いかだ", "たいこ", "ふえ", "すず", "こま", "けんだま", "ふうせん", "つみき", "ぬいぐるみ", "なわとび", "すべりだい", "ぶらんこ", "すなば", "おに", "ろうそく", "ねぎ", "しいたけ", "ごぼう", "かぶ", "あんぱん", "おでん", "てんぷら", "やきいも", "たこやき", "わたがし", "あたま", "め", "みみ", "くち", "て", "あし", "ゆび", "ひげ", "かお", "へそ", "ほね", "はがき", "てがみ", "はこ", "つな", "ひも", "くぎ", "のこぎり", "かなづち", "ねじ", "かもめ", "つる", "わし", "たか", "おうむ", "めだか", "なまず", "ざりがに", "みのむし", "ぺんぎん", "かぜ", "もみじ"], KICONS=[{"fw": 226, "fh": 217}, {"fw": 226, "fh": 194}, {"fw": 226, "fh": 219}, {"fw": 226, "fh": 206}, {"fw": 226, "fh": 196}, {"fw": 226, "fh": 204}, {"fw": 226, "fh": 207}, {"fw": 226, "fh": 223}, {"fw": 224, "fh": 226}, {"fw": 226, "fh": 211}];
@@ -850,10 +850,10 @@ function askHiki(){
   state='hiki';
   let a,b; do{ a=2+(Math.random()*9|0); b=1+(Math.random()*(a-1)|0); }while(a+'-'+b===lastHiki); lastHiki=a+'-'+b;
   const ans=a-b, wrong=[ans-1,ans+1,ans-2,ans+2,ans-3,ans+3,ans-4,ans+4,ans+5,ans-5].filter(n=>n>=0&&n<=9).sort((x,y)=>Math.abs(x-ans)-Math.abs(y-ans)).slice(0,5), ch=[ans,...wrong].sort(()=>Math.random()-.5);
-  panel(`<h2><small>つぎは ひきざん！ ${prog(5)}</small><span class="sum" aria-label="${a} ひく ${b} は？">${a} − ${b} ＝ ？</span></h2><p id="sumMsg">こたえは どれかな？</p>
+  panel(`<h2><small>つぎは ひきざん！ ${prog(3)}</small><span class="sum" aria-label="${a} ひく ${b} は？">${a} − ${b} ＝ ？</span></h2><p id="sumMsg">こたえは どれかな？</p>
     <div class="btns six">${ch.map(n=>`<button class="btn num" data-n="${n}">${n}</button>`).join('')}</div>`);
   addHint(hintSub(a,b)); saySeq(['hiki',`a/shuri/h/q_${a}_${b}.m4a`]);
-  quiz('hiki',()=>{ overlay.querySelector('.sum').textContent=`${a} − ${b} ＝ ${ans}`; },ans,()=>askHikiX(()=>askEng(()=>askFlag(clearStage))),[`a/shuri/h/a_${a}_${b}.m4a`],askHiki);
+  quiz('hiki',()=>{ overlay.querySelector('.sum').textContent=`${a} − ${b} ＝ ${ans}`; },ans,()=>askEng(clearStage),[`a/shuri/h/a_${a}_${b}.m4a`],askHiki);
 }
 // ---------- the homework after a stage (shared by おばけ しゅりけん and ブヨンパンチゲーム; the build puts it in both) ----------
 // eight questions: たしざん → はてなの たしざん → ひらがな → まねして かこう → ひきざん → はてなの ひきざん → えいご → こっき.
@@ -902,7 +902,7 @@ function bigLetter(ch,then){
   const c=ch.codePointAt(0); saySeq(c>=0x3041&&c<=0x3094?[`a/shuri/x/kl_${c.toString(16)}.m4a`]:[]);
   setTimeout(()=>{ d.remove(); then(); },2800);
 }
-const prog=n=>`<span class="prog" aria-label="8もん ちゅう ${n}もんめ">${[1,2,3,4,5,6,7,8].map(i=>i<=n?'●':'○').join('')}</span>`;
+const prog=n=>`<span class="prog" aria-label="4もん ちゅう ${n}もんめ">${[1,2,3,4].map(i=>i<=n?'●':'○').join('')}</span>`;
 function quiz2(kind,right,onRight,showRight,sayRight,again){
   const btns=[...overlay.querySelectorAll('.num')];
   btns.forEach(bt=>bt.onclick=()=>{
@@ -1018,7 +1018,7 @@ function askRead(next){
   const w=[...KWORDS[wi]], score=j=>{ const v=[...KWORDS[j]]; let k=0; v.forEach((c,i)=>{ if(w[i]===c) k+=2; else if(w.includes(c)) k+=1; }); return k-(v.length===w.length?0:2)+Math.random()*1.5; };
   const others=KWORDS.map((x,j)=>j).filter(j=>j!==wi&&KWORDS[j]!==KWORDS[wi]).sort((a,b)=>score(b)-score(a)).slice(0,2);
   const ch=[wi,...others].sort(()=>Math.random()-.5);
-  panel(`<h2><small>よんで えらぼう！ ${prog(3)}</small></h2>
+  panel(`<h2><small>よんで えらぼう！ ${prog(2)}</small></h2>
     <div class="kword rword" aria-label="${KWORDS[wi]}">${w.map(c=>`<span class="kc">${c}</span>`).join('')}</div>
     <p id="sumMsg">この ことばの えは どれかな？</p>
     <div class="btns three">${ch.map(j=>`<button class="btn num pick" data-n="${j}" aria-label="${KWORDS[j]}"><span class="kpic" style="${picStyle(j)}"></span><small></small></button>`).join('')}</div>`);
@@ -1036,7 +1036,7 @@ function askEng(next){
   state='eng';
   let i; do{ i=Math.random()*ENG.length|0; }while(i===lastE); lastE=i;
   const e=ENG[i], ch=two(i,ENG,x=>x.c===e.c);
-  panel(`<h2><small>えいご！ ${prog(7)}</small></h2>
+  panel(`<h2><small>さいごは えいご！ ${prog(4)}</small></h2>
     <div class="eq"><span class="epic" role="img" aria-label="${e.j}">${e.p}</span><span class="eja">${e.j}</span></div>
     <p id="sumMsg">「${e.j}」は えいごで どっち？</p>
     <div class="btns two">${ch.map(k=>`<button class="btn num eng" data-n="${k}"><span lang="en">${ENG[k].w}</span><small>${ENG[k].k}</small></button>`).join('')}</div>`);
@@ -1104,7 +1104,7 @@ function hwResume(){ let h=null; try{ h=JSON.parse(localStorage.getItem(HW)||'nu
 function resumePanel(){
   state='title';
   panel(`<h2><small>${level>LAST?'むげん '+(level-LAST):'ステージ '+level}</small>しゅくだいの つづき</h2>
-    <p>ゲームの あとの しゅくだいが、まだ おわっていないよ。<br>8もん とけたら、つぎへ すすめるよ！</p>
+    <p>ゲームの あとの しゅくだいが、まだ おわっていないよ。<br>4もん とけたら、つぎへ すすめるよ！</p>
     <div class="btns"><button class="btn" id="go">しゅくだいを する</button></div>`);
   $('go').onclick=()=>{ ensureAudio(); askSum(); };
 }
